@@ -180,6 +180,108 @@ public class ListaProductos {
         System.out.println("Total de productos: " + (contador - 1) + "\n");
     }
 
+    // Carrito de compras
+    // (Estos métodos permiten que ListaProductos funcione como el carrito
+    //  personal de un Cliente, además de seguir sirviendo como estructura
+    //  de datos genérica de productos)
+
+    /**
+     * Agrega un producto al carrito a partir de un producto del inventario.
+     * Nunca modifica el objeto original del inventario: crea una copia
+     * independiente con la cantidad comprada, para no alterar accidentalmente
+     * la existencia real de la tienda.
+     * Si el producto ya está en el carrito, simplemente aumenta su cantidad.
+     *
+     * @param productoInventario Producto tal como está en el inventario (ArbolProductos)
+     * @param cantidad           Cantidad que el cliente desea agregar al carrito
+     * @return true si se agregó correctamente, false si los datos son inválidos
+     */
+    public boolean agregarAlCarrito(Producto productoInventario, int cantidad) {
+        if (productoInventario == null || cantidad <= 0) {
+            return false;
+        }
+
+        NodoProducto existente = buscar(productoInventario.getNombre());
+        if (existente != null) {
+            // Ya está en el carrito: se acumula la cantidad
+            Producto productoCarrito = existente.getProducto();
+            productoCarrito.setCantidad(productoCarrito.getCantidad() + cantidad);
+            return true;
+        }
+
+        // No está en el carrito: se crea una copia independiente del producto,
+        // NUNCA se reutiliza la referencia del inventario.
+        Producto copia = new Producto(
+                productoInventario.getNombre(),
+                productoInventario.getPrecio(),
+                productoInventario.getCategoria(),
+                productoInventario.getFechaVencimiento(),
+                cantidad
+        );
+        insertarAlFinal(copia);
+        return true;
+    }
+
+    /**
+     * Calcula el costo total acumulado de todos los productos del carrito
+     * (suma de precio × cantidad de cada producto).
+     * @return Costo total del carrito
+     */
+    public double calcularTotal() {
+        double total = 0.0;
+        NodoProducto tmp = primero;
+        while (tmp != null) {
+            total += tmp.getProducto().calcularCostoTotal();
+            tmp = tmp.getSiguiente();
+        }
+        return total;
+    }
+
+    /**
+     * Calcula la cantidad total de unidades (sumando cantidades de todos
+     * los productos) que hay actualmente en el carrito.
+     * @return Cantidad total de unidades en el carrito
+     */
+    public int calcularTotalItems() {
+        int total = 0;
+        NodoProducto tmp = primero;
+        while (tmp != null) {
+            total += tmp.getProducto().getCantidad();
+            tmp = tmp.getSiguiente();
+        }
+        return total;
+    }
+
+    /**
+     * Genera una representación en texto de los productos del carrito,
+     * lista para incluirse dentro de una factura (una línea por producto,
+     * con cantidad, precio unitario y subtotal).
+     * No imprime nada directamente: retorna el texto para que quien la
+     * invoque decida qué hacer con él (imprimirlo, agregarlo a un reporte, etc.).
+     *
+     * @return Texto formateado con el detalle del carrito, o un mensaje
+     *         indicando que está vacío
+     */
+    public String representarCarrito() {
+        if (estaVacia()) {
+            return "El carrito está vacío.";
+        }
+
+        StringBuilder sb = new StringBuilder();
+        sb.append(String.format("%-20s %-10s %-12s %-12s%n",
+                "Producto", "Cantidad", "Precio", "Subtotal"));
+
+        NodoProducto tmp = primero;
+        while (tmp != null) {
+            Producto p = tmp.getProducto();
+            sb.append(String.format("%-20s %-10d ₡%-11.2f ₡%-11.2f%n",
+                    p.getNombre(), p.getCantidad(), p.getPrecio(), p.calcularCostoTotal()));
+            tmp = tmp.getSiguiente();
+        }
+
+        return sb.toString();
+    }
+
     // Reporte de costos
 
     /**
