@@ -4,6 +4,7 @@ public class InventoryTest {
         testPrioridad();
         testCompra();
         testCasosVacios();
+        testGrafoYDijkstra();
         System.out.println("All inventory tests passed.");
     }
 
@@ -55,6 +56,43 @@ public class InventoryTest {
         Cliente cliente = new Cliente("20", "Empty cart", 1);
         tienda.registrarCliente(cliente);
         assertSame(null, tienda.atenderSiguiente(), "cannot attend empty cart");
+    }
+
+    private static void testGrafoYDijkstra() {
+        Grafo grafo = new Grafo();
+        assertTrue(grafo.agregarVertice("Tienda"), "add store vertex");
+        assertTrue(grafo.agregarVertice("Cliente"), "add client vertex");
+        assertTrue(grafo.agregarVertice("Centro"), "add intermediate vertex");
+        assertTrue(grafo.agregarVertice("Bodega"), "add second intermediate vertex");
+        assertFalse(grafo.agregarVertice(" tienda "), "reject duplicate vertex");
+
+        assertTrue(grafo.agregarArista("Tienda", "Centro", 10), "add first edge");
+        assertTrue(grafo.agregarArista("Centro", "Cliente", 5), "add second edge");
+        assertTrue(grafo.agregarArista("Tienda", "Bodega", 3), "add alternate edge");
+        assertTrue(grafo.agregarArista("Bodega", "Cliente", 20), "add longer edge");
+        assertEquals(10.0, grafo.obtenerDistancia("Centro", "Tienda"), "edge is bidirectional");
+        assertFalse(grafo.agregarArista("Centro", "Tienda", 10), "reject duplicate edge");
+        assertFalse(grafo.agregarArista("Tienda", "Desconocido", 1), "reject unknown endpoint");
+        assertFalse(grafo.agregarArista("Tienda", "Centro", -1), "reject negative distance");
+
+        Ruta ruta = grafo.dijkstra("Cliente", "Tienda");
+        assertEquals("Cliente -> Centro -> Tienda", ruta.getCamino(),
+                "dijkstra path is undirected and shortest");
+        assertEquals(15.0, ruta.getDistancia(), "dijkstra distance");
+
+        Ruta desconectada = grafo.dijkstra("Tienda", "Aislado");
+        assertFalse(desconectada.esAlcanzable(), "unknown destination is unreachable");
+        assertTrue(Double.isInfinite(desconectada.getDistancia()), "unreachable distance is infinite");
+
+        Ruta mismaUbicacion = grafo.dijkstra("Tienda", " tienda ");
+        assertEquals("Tienda", mismaUbicacion.getCamino(), "same vertex path");
+        assertEquals(0.0, mismaUbicacion.getDistancia(), "same vertex distance");
+
+        Grafo mapaBase = new Grafo();
+        mapaBase.cargarMapaBase();
+        assertEquals(5, mapaBase.cantidadVertices(), "base map vertices");
+        assertTrue(mapaBase.dijkstra("Zona Este", "Tienda Central").esAlcanzable(),
+                "base map has connected route");
     }
 
     private static Producto producto(String nombre, double precio, int cantidad) {
