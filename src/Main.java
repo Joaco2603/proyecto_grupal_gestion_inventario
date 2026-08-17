@@ -27,21 +27,51 @@ public class Main {
             System.out.println("14. Salir");
             opcion = leerEntero(scanner, "Seleccione una opción: ");
             switch (opcion) {
-                case 1 -> agregarProducto(tienda, scanner);
-                case 2 -> buscarProducto(tienda, scanner);
-                case 3 -> tienda.getInventario().listarProductos();
-                case 4 -> modificarProducto(tienda, scanner);
-                case 5 -> eliminarProducto(tienda, scanner);
-                case 6 -> agregarImagenProducto(tienda, scanner);
-                case 7 -> registrarCliente(tienda, scanner);
-                case 8 -> tienda.getColaClientes().mostrarCola();
-                case 9 -> atenderCliente(tienda);
-                case 10 -> mostrarUbicaciones(tienda);
-                case 11 -> agregarUbicacion(tienda, scanner);
-                case 12 -> conectarUbicaciones(tienda, scanner);
-                case 13 -> calcularRuta(tienda, scanner);
-                case 14 -> System.out.println("Hasta luego.");
-                default -> System.out.println("Opción inválida.");
+                case 1:
+                    agregarProducto(tienda, scanner);
+                    break;
+                case 2:
+                    buscarProducto(tienda, scanner);
+                    break;
+                case 3:
+                    tienda.getInventario().listarProductos();
+                    break;
+                case 4:
+                    modificarProducto(tienda, scanner);
+                    break;
+                case 5:
+                    eliminarProducto(tienda, scanner);
+                    break;
+                case 6:
+                    agregarImagenProducto(tienda, scanner);
+                    break;
+                case 7:
+                    registrarCliente(tienda, scanner);
+                    break;
+                case 8:
+                    tienda.getColaClientes().mostrarCola();
+                    break;
+                case 9:
+                    atenderCliente(tienda);
+                    break;
+                case 10:
+                    mostrarUbicaciones(tienda);
+                    break;
+                case 11:
+                    agregarUbicacion(tienda, scanner);
+                    break;
+                case 12:
+                    conectarUbicaciones(tienda, scanner);
+                    break;
+                case 13:
+                    calcularRuta(tienda, scanner);
+                    break;
+                case 14:
+                    System.out.println("Hasta luego.");
+                    break;
+                default:
+                    System.out.println("Opción inválida.");
+                    break;
             }
         } while (opcion != 14);
     }

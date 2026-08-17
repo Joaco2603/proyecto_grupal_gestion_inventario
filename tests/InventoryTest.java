@@ -111,15 +111,21 @@ public class InventoryTest {
         assertTrue(tienda.agregarAlCarrito(cliente, "Te", 3), "add to cart for delivery test");
         tienda.registrarCliente(cliente);
         assertSame(cliente, tienda.atenderSiguiente(), "attend client with reachable route");
+        Ruta ruta = tienda.calcularRuta("Zona Este");
+        assertEquals("Tienda Central -> Centro de Distribución -> Barrio Sur -> Zona Este",
+                ruta.getCamino(), "delivery path");
+        assertEquals(12.0, ruta.getDistancia(), "delivery distance");
         String factura = tienda.generarFactura(cliente);
-        assertTrue(factura.contains("Zona Este"), "invoice mentions delivery route");
+        assertTrue(factura.contains(ruta.getCamino()), "invoice mentions delivery path");
+        assertTrue(factura.contains("Distancia total:"), "invoice mentions delivery distance");
         assertEquals(7, tienda.buscarProducto("Te").getCantidad(), "stock decremented after delivery");
 
-        // Caso no alcanzable: ubicación registrada pero sin ninguna conexión.
-        assertTrue(tienda.agregarUbicacion("Isla Aislada"), "add isolated location");
+        // Caso no alcanzable: el cliente agrega su ubicación automáticamente.
         Cliente aislado = new Cliente("31", "Sin ruta", 1, "Isla Aislada");
         assertTrue(tienda.agregarAlCarrito(aislado, "Te", 1), "add to cart for unreachable test");
+        assertFalse(tienda.contieneUbicacion("Isla Aislada"), "location starts absent");
         tienda.registrarCliente(aislado);
+        assertTrue(tienda.contieneUbicacion("Isla Aislada"), "client location is added automatically");
         assertSame(null, tienda.atenderSiguiente(), "cannot attend client without delivery route");
 
         // Conectar la ubicación aislada y volver a intentar.
