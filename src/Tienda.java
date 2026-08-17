@@ -73,6 +73,28 @@ public class Tienda {
         return grafo.obtenerUbicaciones();
     }
 
+    /**
+     * Agrega una nueva ubicación al mapa de entregas, independientemente
+     * de si ya existe un cliente asociado a ella.
+     *
+     * @param ubicacion Nombre de la ubicación a registrar
+     * @return true si se agregó correctamente, false si ya existía o era inválida
+     */
+    public boolean agregarUbicacion(String ubicacion) {
+        return grafo.agregarVertice(ubicacion);
+    }
+
+    /**
+     * Calcula la ruta más corta desde la tienda hasta cualquier
+     * ubicación registrada en el mapa, sin necesidad de un cliente.
+     *
+     * @param destino Ubicación de destino
+     * @return Resultado de la ruta calculada
+     */
+    public Ruta calcularRuta(String destino) {
+        return grafo.dijkstra(ubicacion, destino);
+    }
+
     /** Registra un producto en el inventario si el nombre no está repetido. */
     public boolean agregarProducto(Producto producto) {
         return inventario.insertar(producto);

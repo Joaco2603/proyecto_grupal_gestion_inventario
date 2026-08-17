@@ -5,6 +5,7 @@ public class InventoryTest {
         testCompra();
         testCasosVacios();
         testGrafoYDijkstra();
+        testTiendaEntrega();
         System.out.println("All inventory tests passed.");
     }
 
@@ -22,10 +23,10 @@ public class InventoryTest {
 
     private static void testPrioridad() {
         ColaClientes cola = new ColaClientes();
-        Cliente basico = new Cliente("1", "Basic", 1);
-        Cliente premium1 = new Cliente("2", "Premium 1", 3);
-        Cliente premium2 = new Cliente("3", "Premium 2", 3);
-        Cliente afiliado = new Cliente("4", "Affiliated", 2);
+        Cliente basico = new Cliente("1", "Basic", 1, "Tienda Central");
+        Cliente premium1 = new Cliente("2", "Premium 1", 3, "Tienda Central");
+        Cliente premium2 = new Cliente("3", "Premium 2", 3, "Tienda Central");
+        Cliente afiliado = new Cliente("4", "Affiliated", 2, "Tienda Central");
         cola.encolar(basico);
         cola.encolar(premium1);
         cola.encolar(afiliado);
@@ -40,7 +41,8 @@ public class InventoryTest {
     private static void testCompra() {
         Tienda tienda = new Tienda();
         tienda.agregarProducto(producto("Cafe", 1200, 5));
-        Cliente cliente = new Cliente("10", "Client", 2);
+        // "Centro de Distribución" ya viene conectado a "Tienda Central" en el mapa base.
+        Cliente cliente = new Cliente("10", "Client", 2, "Centro de Distribución");
         assertTrue(tienda.agregarAlCarrito(cliente, "cafe", 2), "add to cart");
         assertFalse(tienda.agregarAlCarrito(cliente, "cafe", 4), "reject insufficient stock");
         tienda.registrarCliente(cliente);
@@ -53,7 +55,7 @@ public class InventoryTest {
         Tienda tienda = new Tienda();
         assertTrue(tienda.getInventario().estaVacio(), "empty inventory");
         assertSame(null, tienda.atenderSiguiente(), "cannot attend empty queue");
-        Cliente cliente = new Cliente("20", "Empty cart", 1);
+        Cliente cliente = new Cliente("20", "Empty cart", 1, "Barrio Norte");
         tienda.registrarCliente(cliente);
         assertSame(null, tienda.atenderSiguiente(), "cannot attend empty cart");
     }
@@ -93,6 +95,37 @@ public class InventoryTest {
         assertEquals(5, mapaBase.cantidadVertices(), "base map vertices");
         assertTrue(mapaBase.dijkstra("Zona Este", "Tienda Central").esAlcanzable(),
                 "base map has connected route");
+    }
+
+    /**
+     * Prueba de integración: producto + cliente + cola + grafo de entregas,
+     * tal como se usa realmente desde el menú de Main.
+     */
+    private static void testTiendaEntrega() {
+        Tienda tienda = new Tienda();
+        tienda.agregarProducto(producto("Te", 800, 10));
+
+        // Caso alcanzable: "Zona Este" ya está conectada en el mapa base
+        // (Tienda Central -> Centro de Distribución -> Barrio Sur -> Zona Este).
+        Cliente cliente = new Cliente("30", "Con ruta", 1, "Zona Este");
+        assertTrue(tienda.agregarAlCarrito(cliente, "Te", 3), "add to cart for delivery test");
+        tienda.registrarCliente(cliente);
+        assertSame(cliente, tienda.atenderSiguiente(), "attend client with reachable route");
+        String factura = tienda.generarFactura(cliente);
+        assertTrue(factura.contains("Zona Este"), "invoice mentions delivery route");
+        assertEquals(7, tienda.buscarProducto("Te").getCantidad(), "stock decremented after delivery");
+
+        // Caso no alcanzable: ubicación registrada pero sin ninguna conexión.
+        assertTrue(tienda.agregarUbicacion("Isla Aislada"), "add isolated location");
+        Cliente aislado = new Cliente("31", "Sin ruta", 1, "Isla Aislada");
+        assertTrue(tienda.agregarAlCarrito(aislado, "Te", 1), "add to cart for unreachable test");
+        tienda.registrarCliente(aislado);
+        assertSame(null, tienda.atenderSiguiente(), "cannot attend client without delivery route");
+
+        // Conectar la ubicación aislada y volver a intentar.
+        assertTrue(tienda.agregarConexion("Tienda Central", "Isla Aislada", 12), "connect isolated location");
+        assertTrue(tienda.calcularRuta("Isla Aislada").esAlcanzable(), "route now reachable after connecting");
+        assertSame(aislado, tienda.atenderSiguiente(), "attend client after route is connected");
     }
 
     private static Producto producto(String nombre, double precio, int cantidad) {
