@@ -1,34 +1,37 @@
 # Aplicación de Gestión de Inventarios
 
-Proyecto de **Estructuras de Datos (SOFT-10)**, Universidad CENFOTEC.
+Aplicación de consola para el curso **Estructuras de Datos (SOFT-10)** de la
+Universidad CENFOTEC.
 
-## Funcionalidad
+## Funcionalidades principales
 
-La aplicación permite registrar productos en un inventario implementado como
-árbol binario de búsqueda, registrar clientes con prioridad y procesar sus
-compras mediante una cola estable de prioridad.
+- Inventario de productos implementado con un árbol binario de búsqueda.
+- Cola de clientes ordenada por prioridad y por orden de llegada.
+- Carrito de compras basado en una lista enlazada.
+- Descuento de existencias al completar una compra.
+- Grafo ponderado y no dirigido para representar las ubicaciones.
+- Búsqueda de la ruta más corta con el algoritmo de Dijkstra.
+- Validación para impedir la atención de clientes sin ruta de entrega.
+- Factura con productos, total, camino de entrega y distancia.
+- Menú para consultar, agregar y conectar ubicaciones.
 
-- El árbol usa el nombre del producto como llave.
-- Las prioridades son: 1 básico, 2 afiliado y 3 premium.
-- Una prioridad mayor se atiende primero.
-- En caso de empate se respeta el orden de llegada.
-- Cada cliente posee un carrito basado en una lista enlazada.
-- Al atender una compra se valida y descuenta el stock disponible.
-- La factura muestra productos, cantidades, subtotales y total acumulado.
-
-## Estructura principal
+## Estructuras principales
 
 | Clase | Responsabilidad |
 |---|---|
-| `Producto` | Datos y costo de un producto |
-| `NodoArbolProducto` / `ArbolProductos` | Inventario como árbol binario de búsqueda |
-| `Cliente` | Identidad, prioridad y carrito |
-| `NodoCliente` / `ColaClientes` | Cola enlazada de prioridad estable |
-| `NodoProducto` / `ListaProductos` | Lista enlazada utilizada por los carritos |
-| `Tienda` | Integración del inventario, clientes y compras |
-| `Main` | Menú de consola y entrada del programa |
+| `Producto` | Datos, precio, cantidad e imágenes de un producto |
+| `ArbolProductos` | Inventario ordenado por nombre |
+| `Cliente` | Identidad, prioridad, ubicación y carrito |
+| `ColaClientes` | Atención prioritaria de clientes |
+| `ListaProductos` | Lista enlazada para los carritos |
+| `Grafo` | Ubicaciones, conexiones y rutas |
+| `VerticeGrafo` | Ubicación y conexiones enlazadas |
+| `AristaGrafo` | Destino y distancia de una conexión |
+| `Ruta` | Camino y distancia calculados por Dijkstra |
+| `Tienda` | Integración del inventario, clientes y entregas |
+| `Main` | Menú y ejecución de la aplicación |
 
-## Compilación y ejecución
+## Ejecución
 
 Requiere Java 17 o superior.
 
@@ -37,13 +40,16 @@ javac src/*.java -d out
 java -cp out Main
 ```
 
-## Pruebas de estructuras e integración
+## Pruebas
 
 ```bash
 javac src/*.java tests/InventoryTest.java -d /tmp/inventario-tests
-java -cp /tmp/inventario-tests InventoryTest
+java -ea -cp /tmp/inventario-tests InventoryTest
 ```
+
+Las pruebas verifican el árbol, la cola prioritaria, las compras, Dijkstra,
+las rutas desconectadas, la integración con la tienda y la factura de entrega.
 
 ## Entrega
 
-Repositorio: https://github.com/Joaco2603/primer_avance_proyecto_grupal_gestion_inventario
+Repositorio: https://github.com/Joaco2603/proyecto_grupal_gestion_inventario
